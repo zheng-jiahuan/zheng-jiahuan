@@ -1,0 +1,15 @@
+---
+layout: default
+title: 编译器学习与分享专栏
+description: 编译器学习与分享专栏文章列表页面
+---
+<h1>Latest Articles</h1>
+
+<ul>
+  {% for article in site.compiler_column %}
+    <li>
+      <h2><a href="{{ article.url }}">{{ article.title }} - {{ article.date | date_to_string }}</a></h2>
+      <p>{{ article.excerpt }}</p>
+    </li>
+  {% endfor %}
+</ul>

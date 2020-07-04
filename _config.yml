@@ -1,0 +1,9 @@
+title: Zhenghanhan's Blog
+description: Never Cease to be Eager to Technology.
+show_downloads: true
+google_analytics:
+busuanzi: true
+theme: jekyll-theme-cayman
+collections:
+  compiler_column:
+    output: true
