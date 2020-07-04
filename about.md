@@ -1,5 +1,4 @@
 ---
 layout: default
 ---
-
-稍后完善........
+email: alanwilliams@foxmail.com
