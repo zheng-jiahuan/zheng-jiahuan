@@ -87,7 +87,8 @@ using the next value from the same counter as used for unnamed temporaries
 ## 通过一些例子学习LLVM IR
 下面笔者将通过一些小例子对一些常见的LLVM IR指令进行解释，遇到不知道的指令，就去手册[<sup>3</sup>](#refer-anchor-3)中去查，那里是权威。
 
-1. 例子1
+### 1. 例子1
+
 ```
 int subFiveThree() { 
   int a = 5; 
@@ -183,7 +184,7 @@ define dso_local i32 @subFiveThree() #0 {
 ```
 暂时先不谈论这几个优化pass的内部实现。
 
-2. 例子2[<sup>5</sup>](#refer-anchor-5)：
+### 2. 例子2[<sup>5</sup>](#refer-anchor-5)：
 
 ```c
 #include<stdio.h> 
