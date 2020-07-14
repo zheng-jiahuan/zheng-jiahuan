@@ -60,25 +60,17 @@ entries:
       url: /mydoc_introduction.html
       output: web, pdf
 
-  - title: Compiler Theory
+  - title: Compiler
     output: web, pdf
     folderitems:
 
-    - title: LLVM Getting Started
-      url: /2019-10-04-llvm_getting_started.html
-      output: web, pdf
+    - title: compiler overview
+      url: /2020-07-13_compiler_overview.html
+      output: web
 
-    - title: LLVM Src Download and Compile
-      url: /2019-10-06-llvm_src_download_and_compiling.html
-      output: web, pdf
-
-    - title: LLVM IR Overview
-      url: /2019-10-06-llvm_ir_overview.html
-      output: web, pdf
-
-    - title: LLVM IR Key Data Structure
-      url: /2019-10-07-llvm_ir_key_data_structure_introduction.html
-      output: web, pdf
+    - title: llvm
+      url: /list_llvm.html
+      output: web
 
   - title: Algorithm
     output: web, pdf

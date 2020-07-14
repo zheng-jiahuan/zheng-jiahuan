@@ -1,12 +1,13 @@
 ---
 title: LLVM IR 概览
-keywords: compiler, llvm ir, getting_started
+keywords: compiler, llvm ir
 last_updated: October 06, 2019
-tags: [getting_started, compiler, llvm]
+created: 2019-10-06
+tags: [compiler, llvm, default]
 summary: "本文简要介绍了一些LLVM IR的初步概念"
 sidebar: mydoc_sidebar
 permalink: 2019-10-06-llvm_ir_overview.html
-folder: compiler
+folder: compiler/llvm
 ---
 
 ## 引言

@@ -2,7 +2,8 @@
 title: 计算机专业好书推荐
 keywords: computer books, book recommendation
 last_updated: December 30, 2019
-tags: [general]
+created: 2019-12-30
+tags: [general, default]
 summary: "本文列举了一些注重境界提升的优秀书籍供大家参考"
 sidebar: mydoc_sidebar
 permalink: 2019-12-30-computer-books.html
@@ -55,6 +56,8 @@ folder: general
 
 ## 虚拟机
  1. [Java Language and Virtual Machine Specifications](https://docs.oracle.com/javase/specs/index.html)<br> Oracle公司官方文档，绝对值得反复看的哈
+
+ 2. [深入理解Android：Java虚拟机ART](https://read.douban.com/ebook/110275324/)<br> 邓凡平大佬写的，这本书写的特别好，大力推荐
 
  2. [深入理解Java虚拟机 JVM高级特性与最佳实践](https://book.douban.com/subject/24722612/)<br> 国内这方便比较好的书，周志明先生写的
 

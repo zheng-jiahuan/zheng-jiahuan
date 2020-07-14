@@ -2,11 +2,12 @@
 title: LLVM学习开动篇
 keywords: compiler, llvm, getting_started
 last_updated: October 04, 2019
-tags: [getting_started, compiler, llvm]
+created: 2019-10-04
+tags: [getting_started, compiler, llvm, default]
 summary: "本文为LLVM学习的开动篇"
 sidebar: mydoc_sidebar
 permalink: 2019-10-04-llvm_getting_started.html
-folder: compiler
+folder: compiler/llvm
 ---
 
 ## 引言

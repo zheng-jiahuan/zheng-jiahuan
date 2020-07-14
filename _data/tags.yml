@@ -18,3 +18,4 @@ allowed-tags:
   - algorithm
   - compiler
   - operating_system
+  - default

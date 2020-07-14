@@ -1,12 +1,13 @@
 ---
 title: LLVM IR-重要数据结构简介
-keywords: compiler, llvm ir, getting_started
+keywords: compiler, llvm ir
 last_updated: October 07, 2019
-tags: [getting_started, compiler, llvm]
+created: 2019-10-07
+tags: [compiler, llvm, default]
 summary: "本文简要介绍LLVM IR在内存中的表示形态与结构"
 sidebar: mydoc_sidebar
 permalink: 2019-10-07-llvm_ir_key_data_structure_introduction.html
-folder: compiler
+folder: compiler/llvm
 ---
 
 ## 引言

@@ -2,11 +2,12 @@
 title: LLVM源码下载与编译
 keywords: compiler, llvm, getting_started, download and compile
 last_updated: October 06, 2019
-tags: [getting_started, compiler, llvm]
+created: 2019-10-06
+tags: [getting_started, compiler, llvm, default]
 summary: "本文简要介绍了如何下载和编译LLVM代码"
 sidebar: mydoc_sidebar
-permalink: 2019-10-06-llvm_src_download_and_compiling.html
-folder: compiler
+permalink: 2019-10-06-llvm_src_download_and_compile.html
+folder: compiler/llvm
 ---
 
 ## 环境简介
