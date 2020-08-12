@@ -1,7 +1,7 @@
 ---
 title: LLVM源码下载与编译
 keywords: compiler, llvm, getting_started, download and compile
-last_updated: October 06, 2019
+last_updated: July 27, 2020
 created: 2019-10-06
 tags: [getting_started, compiler, llvm, default]
 summary: "本文简要介绍了如何下载和编译LLVM代码"
@@ -11,7 +11,8 @@ folder: compiler/llvm
 ---
 
 ## 环境简介
-笔者的环境是搭在VMware Workstation虚拟出的Ubuntu 16.04操作系统实例上的
+笔者的环境是搭在VMware Workstation虚拟出的Ubuntu 20.04操作系统实例上的，VMware Workstation
+运行在搭载着Win10系统的笔记本上，笔记本硬件配置 CPU i7-8750H，内存16GB*2。
 
 ## LLVM源码下载
 LLVM的下载来源主要来自于这两个官方链接，一个是LLVM 稳定版本的下载[<sup>1</sup>](#refer-anchor-1)，即稳定的发布版
@@ -22,6 +23,8 @@ LLVM的下载来源主要来自于这两个官方链接，一个是LLVM 稳定�
 ```
 git clone https://github.com/llvm/llvm-project.git
 ```
+如果只是运用clang和llvm相关工具，则可以单独下载clang和llvm代码，并将它们放置在同一个目录下即可（本文中的目录为llvm-project），
+不需采用上述git clone的方式将所有代码都下载下来。
 
 
 ## LLVM源码编译
@@ -50,8 +53,7 @@ CMake是跨平台的构建生成器，本身并不构建项目，而是生成各
 cmake -G <generator> [options] ../llvm
 ```
 
-`<generator>`：常见的有Ninja、Unix Makefiles 等，由于Ninja备受官网推荐，所以本文使用
-Ninja。
+`<generator>`：常见的有Ninja、Unix Makefiles 等。
 
 `[options]` ：这里介绍几个常见的
 
@@ -59,13 +61,14 @@ Ninja。
 LLVM_ENABLE_PROJECTS整个变量定义为何值。LLVM_ENABLE_PROJECTS中列的值（如果有
 多个值，以封号隔开），表示的是除了LLVM Core libraries外，还需要构建的子项目。本文需要
 clang，所以本文-DLLVM_ENABLE_PROJECTS="clang"。
-另一个就是 -DCMAKE_BUILD_TYPE=type ，由于默认该项值是Debug，但是由于编译Debug时间太
-长，而且对内存要求比较高，笔者这里将其修改成Release，即-DCMAKE_BUILD_TYPE=release
+另一个就是 -DCMAKE_BUILD_TYPE=type ，由于默认该项值是Debug，但是由于编译Debug时间太长，
+而且对内存要求比较高，笔者这里将其修改成Release，即-DCMAKE_BUILD_TYPE=release
 综上，笔者在build目录下，执行了如下命令：
 
 ```
 cmake -G  Ninja  -DLLVM_ENABLE_PROJECTS="clang"  -DCMAKE_BUILD_TYPE=release ../llvm
 ```
+
 
 在上述命令执行的过程中，cmake会检查当前的环境是否符合后续构建的要求，比如必要的软件是
 否安装上、已经安装的软件，其版本是否符合要求等。比如，笔者遇到了Ninja版本不符合要求的
@@ -92,6 +95,26 @@ ninja
 {% include image.html file="2019-10-06-llvm_src_download_and_compiling/3.png" url="" alt="LLVM Build BIN DIR" caption="Detail of LLVM Build BIN DIR" max-width="600" %}
 
 将这个bin目录放置到系统的PATH变量中，就可以随时随地使用这些刚刚编译出炉的executable了。
+
+笔者之前使用8G x 2的笔记本构建debug版本的llvm等，但是构建失败了，因为OOM了，于是笔者今天把内存换成了
+16G x 2的了，分配给虚拟机的内存有25GB左右，然后使用下述命令再次构建。
+```
+cmake -G  Ninja  -DLLVM_ENABLE_PROJECTS="clang"  -DCMAKE_BUILD_TYPE=debug ../llvm
+```
+到最后快要构建完的时候，卡住了，卡了足足有10几个小时，整个ubuntu像freeze了一样，如下图：
+{% include image.html file="2019-10-06-llvm_src_download_and_compiling/llvm_build_debug_freeze.png" url="" alt="LLVM Debug Build Freeze" caption="LLVM Debug Build Freeze the System" max-width="900" %}
+使用htop命令查看了下内存占用，发现内存被吃光了，还吃光了swap分区。经过分析，猜测是ninja编译的时候启动了太多
+的线程，以及默认的GNU的ld效率不高，于是我将ninja换成了make，同时linker换成gold，不再使用其默认的gnu linker，并控制开启线程的数量。首先将build目录下
+的内容删除干净，然后
+```
+cmake -G  "Unix Makefiles"  -DLLVM_USE_LINKER=gold   -DLLVM_ENABLE_PROJECTS="clang"  -DCMAKE_BUILD_TYPE=debug ../llvm
+```
+这样就生成了适合make构建的文件，然后使用
+```
+make -j4
+```
+然后使用-j4限制了4线程编译，然后编译成功了。
+
 
 以上部分主要参考这两个官方链接，一个是Getting Started with the LLVM System[<sup>4</sup>](#refer-anchor-4)，
 一个是Getting Started: Building and Running Clang[<sup>5</sup>](#refer-anchor-5)，如果想进一步了解细节的，可以参考这两个链接。

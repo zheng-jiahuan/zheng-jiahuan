@@ -56,8 +56,12 @@ entries:
     output: web, pdf
     folderitems:
 
-    - title: Introduction
-      url: /mydoc_introduction.html
+    - title: art
+      url: /list_art.html
+      output: web, pdf
+
+    - title: jni
+      url: /list_jni.html
       output: web, pdf
 
   - title: Compiler
