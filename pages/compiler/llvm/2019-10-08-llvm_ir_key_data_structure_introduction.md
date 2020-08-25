@@ -2,11 +2,11 @@
 title: LLVM IR-重要数据结构简介
 keywords: compiler, llvm ir
 last_updated: October 07, 2019
-created: 2019-10-07
+created: 2019-10-08
 tags: [compiler, llvm, default]
 summary: "本文简要介绍LLVM IR在内存中的表示形态与结构"
 sidebar: mydoc_sidebar
-permalink: 2019-10-07-llvm_ir_key_data_structure_introduction.html
+permalink: 2019-10-08-llvm_ir_key_data_structure_introduction.html
 folder: compiler/llvm
 ---
 
@@ -18,7 +18,7 @@ folder: compiler/llvm
 
 1. Value及常见子类
 
-{% include image.html file="2019-10-07-llvm_ir_key_data_structure_introduction/1.png" url="" alt="Value and Its Commonly-Used SubClasses" caption="Value and Its Commonly-Used SubClasses" max-width="600" %}
+{% include image.html file="2019-10-08-llvm_ir_key_data_structure_introduction/1.png" url="" alt="Value and Its Commonly-Used SubClasses" caption="Value and Its Commonly-Used SubClasses" max-width="600" %}
 
 
 我大致绘制了一些常见的Value的子类，每个Value类型的实例都是有Type的。关于[Value](http://llvm.org/docs/ProgrammersManual.html#the-value-class)
@@ -65,7 +65,7 @@ define dso_local i32 @func(i32 %0, i32 %1, i32 %2) #0 {
 } 
 ```
 为了说明问题，将其转化成下图：
-{% include image.html file="2019-10-07-llvm_ir_key_data_structure_introduction/2.png" url="" alt="IR Illustration" caption="IR Illustration" max-width="600" %}
+{% include image.html file="2019-10-08-llvm_ir_key_data_structure_introduction/2.png" url="" alt="IR Illustration" caption="IR Illustration" max-width="600" %}
 
 
 这里，着重看虚线框框出来的三条指令，每条指令在内存中都由一个Instruction子类对象来表
@@ -114,11 +114,11 @@ class Use {
 
 所以在内存中，use list类似于这种：
 
-{% include image.html file="2019-10-07-llvm_ir_key_data_structure_introduction/user_list.png" url="" alt="User List" 
+{% include image.html file="2019-10-08-llvm_ir_key_data_structure_introduction/user_list.png" url="" alt="User List" 
 caption="User List" max-width="600" %}
 
 接下来关注下Function和GlobalVariable类，把上图在下面再粘贴一下
-{% include image.html file="2019-10-07-llvm_ir_key_data_structure_introduction/1.png" url="" alt="Value and Its Commonly-Used SubClasses" caption="Value and Its Commonly-Used SubClasses" max-width="600" %}
+{% include image.html file="2019-10-08-llvm_ir_key_data_structure_introduction/1.png" url="" alt="Value and Its Commonly-Used SubClasses" caption="Value and Its Commonly-Used SubClasses" max-width="600" %}
 
 为啥全局变量（GlobalVariable）和函数（Function）是用Constant的子类，可能可以这样理
 解，那就是全局变量和函数它们在链接后，它们的Value（即地址address）都是固定的，从这种
@@ -129,7 +129,7 @@ caption="User List" max-width="600" %}
 
 2. Type及常见子类
 
-{% include image.html file="2019-10-07-llvm_ir_key_data_structure_introduction/type_and_subclass.png" url="" alt="User List" 
+{% include image.html file="2019-10-08-llvm_ir_key_data_structure_introduction/type_and_subclass.png" url="" alt="User List" 
 caption="User List" max-width="600" %}
 
 每个Value都有一个Type，这个很好理解哈，值得注意的是，Type不是Value的子类哈。
@@ -140,7 +140,7 @@ caption="User List" max-width="600" %}
 
 其次介绍一下Module、Function、BasicBlock以及Instruction实例之间在内存中的组织关系
 
-{% include image.html file="2019-10-07-llvm_ir_key_data_structure_introduction/relation.png" url="" alt="Organization In Memory" 
+{% include image.html file="2019-10-08-llvm_ir_key_data_structure_introduction/relation.png" url="" alt="Organization In Memory" 
 caption="Organization In Memory" max-width="400" %}
 
 上图非常清晰的将这四个结构在LLVM中的组织方式展示了出来，可以看出，这些数据结构以某种

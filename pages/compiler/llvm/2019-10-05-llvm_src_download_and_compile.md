@@ -2,11 +2,11 @@
 title: LLVM源码下载与编译
 keywords: compiler, llvm, getting_started, download and compile
 last_updated: July 27, 2020
-created: 2019-10-06
+created: 2019-10-05
 tags: [getting_started, compiler, llvm, default]
 summary: "本文简要介绍了如何下载和编译LLVM代码"
 sidebar: mydoc_sidebar
-permalink: 2019-10-06-llvm_src_download_and_compile.html
+permalink: 2019-10-05-llvm_src_download_and_compile.html
 folder: compiler/llvm
 ---
 
@@ -32,7 +32,7 @@ git clone https://github.com/llvm/llvm-project.git
 可以看到如下文件陈列：
 
 
-{% include image.html file="2019-10-06-llvm_src_download_and_compiling/1.png" url="" alt="LLVM Src Download and Compile" caption="LLVM Src Download and Compile" max-width="600" %}
+{% include image.html file="2019-10-05-llvm_src_download_and_compiling/1.png" url="" alt="LLVM Src Download and Compile" caption="LLVM Src Download and Compile" max-width="600" %}
 
 LLVM不支持直接在源码树中直接构建 （in-tree build is not supported），这也比较容易理解，
 这样可以使得项目保持整洁，不至于混乱不堪，搅在一起。现在新建一个目录，用来存放待会编译
@@ -89,10 +89,10 @@ ninja
 ```
 就开始构建clang和llvm了。构建完毕之后，build目录结构如下：
 
-{% include image.html file="2019-10-06-llvm_src_download_and_compiling/2.png" url="" alt="LLVM Build DIR" caption="Detail of LLVM Build DIR" max-width="600" %}
+{% include image.html file="2019-10-05-llvm_src_download_and_compiling/2.png" url="" alt="LLVM Build DIR" caption="Detail of LLVM Build DIR" max-width="600" %}
 
 我们构建出的各个可执行文件在build/bin目录下，如下图：
-{% include image.html file="2019-10-06-llvm_src_download_and_compiling/3.png" url="" alt="LLVM Build BIN DIR" caption="Detail of LLVM Build BIN DIR" max-width="600" %}
+{% include image.html file="2019-10-05-llvm_src_download_and_compiling/3.png" url="" alt="LLVM Build BIN DIR" caption="Detail of LLVM Build BIN DIR" max-width="600" %}
 
 将这个bin目录放置到系统的PATH变量中，就可以随时随地使用这些刚刚编译出炉的executable了。
 
@@ -102,7 +102,7 @@ ninja
 cmake -G  Ninja  -DLLVM_ENABLE_PROJECTS="clang"  -DCMAKE_BUILD_TYPE=debug ../llvm
 ```
 到最后快要构建完的时候，卡住了，卡了足足有10几个小时，整个ubuntu像freeze了一样，如下图：
-{% include image.html file="2019-10-06-llvm_src_download_and_compiling/llvm_build_debug_freeze.png" url="" alt="LLVM Debug Build Freeze" caption="LLVM Debug Build Freeze the System" max-width="900" %}
+{% include image.html file="2019-10-05-llvm_src_download_and_compiling/llvm_build_debug_freeze.png" url="" alt="LLVM Debug Build Freeze" caption="LLVM Debug Build Freeze the System" max-width="900" %}
 使用htop命令查看了下内存占用，发现内存被吃光了，还吃光了swap分区。经过分析，猜测是ninja编译的时候启动了太多
 的线程，以及默认的GNU的ld效率不高，于是我将ninja换成了make，同时linker换成gold，不再使用其默认的gnu linker，并控制开启线程的数量。首先将build目录下
 的内容删除干净，然后
