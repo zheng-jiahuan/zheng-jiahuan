@@ -116,13 +116,33 @@ ANDROID_LOG_TAGS="*:e" out/soong/host/linux-x86/bin/dex2oatd --avoid-storing-inv
 
 out/soong/host/linux-x86/bin/dex2oatd的编译选项可以参考[这个页面](./2020-08-26-dex2oat_options.html)
 
+挑几个选项含义
+```
+--dex-file=<dex-file>: specifies a .dex, .jar, or .apk file to compile.
+    Example: --dex-file=/system/framework/core.jar
 
+--dex-location=<dex-location>: specifies an alternative dex location to
+    encode in the oat file for the corresponding --dex-file argument.
+    Example: --dex-file=/home/build/out/system/framework/core.jar
+             --dex-location=/system/framework/core.jar
+```
+呐，对于core-oj.jar来说，
 
+--dex-location=/apex/com.android.runtime/javalib/core-oj.jar 
 
+--dex-file=out/soong/walleye/dex_bootjars_input/core-oj.jar 
 
+它在服务器上被编译的时候，它的位置是out/soong/walleye/dex_bootjars_input/core-oj.jar，
+但是这个jar它在手机上的位置信息是--dex-location=/apex/com.android.runtime/javalib/core-oj.jar
+，从--dex-location编译选项的描述中可以得知，这个/apex/com.android.runtime/javalib/core-oj.jar
+也会被编码（encode）进boot产物中。
 
-
-
+我在dex2oat代码中加打印来着，然后编译aosp代码，想要看上面这个命令执行的过程中的一些地方的信息。
+```
+LOG(ERROR) << "error jiahuan";
+LOG(INFO) << "info jiahuan";
+```
+发现INFO级别的Log打印不出来，ERROR可以打印出来，
 
 
 
