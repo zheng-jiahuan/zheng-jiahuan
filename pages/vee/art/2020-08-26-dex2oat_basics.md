@@ -272,6 +272,7 @@ out/soong/host/linux-x86/bin/dex2oatd
 --no-inline-from=core-oj.jar
 --abort-on-hard-verifier-error
 --generate-mini-debug-info
+```
 
 第三处：
 ```
