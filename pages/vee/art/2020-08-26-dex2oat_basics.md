@@ -225,6 +225,7 @@ out/soong/host/linux-x86/bin/dex2oatd
 
 第二处：
 
+```
 out/soong/host/linux-x86/bin/dex2oatd
 --avoid-storing-invocation
 --write-invocation-to=out/soong/walleye/dex_apexjars/system/framework/arm64/apex.invocation
@@ -449,7 +450,11 @@ SIZE:
 
 .bss: 18 methods, 242 GC roots.
 ```
+
+
 另一个文件头
+
+
 ```
 AGIC:
 oat
