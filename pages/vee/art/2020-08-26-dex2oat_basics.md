@@ -4,7 +4,7 @@ keywords: art, compiler
 last_updated: Aug 20, 2020
 created: 2020-08-20
 tags: [art,default]
-summary: 
+summary: 本文简要介绍在编译AOSP的过程中，dex2oat的一些相关信息
 sidebar: mydoc_sidebar
 permalink: 2020-08-26-dex2oat_basics.html
 folder: vee/art
