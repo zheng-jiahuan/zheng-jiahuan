@@ -231,7 +231,7 @@ out/soong/host/linux-x86/bin/dex2oatd
 --write-invocation-to=out/soong/walleye/dex_apexjars/system/framework/arm64/apex.invocation
 --runtime-arg
 -Xms64m
---runtime-arg
+--runtime-arg 
 -Xmx64m
 --compiler-filter=speed-profile 
 --profile-file=out/soong/walleye/dex_bootjars/boot.prof

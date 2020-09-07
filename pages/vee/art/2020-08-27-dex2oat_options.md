@@ -1,8 +1,8 @@
 ---
 title: Dex2Oat 编译选项列表
 keywords: art, compiler
-last_updated: Aug 20, 2020
-created: 2020-08-20
+last_updated: Aug 27, 2020
+created: 2020-08-27
 tags: [art,default]
 summary: 本文列举了Q r40版本 dex2oatd的编译选项
 sidebar: mydoc_sidebar
