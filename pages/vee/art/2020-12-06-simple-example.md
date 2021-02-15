@@ -175,11 +175,11 @@ Class #341            -
       ins           : 1
       outs          : 1
       insns size    : 7 16-bit code units
-1c1000:                                        |[1c1000] android.app.CompilerHelper.<init>:()V
-1c1010: 7010 40fc 0100                         |0000: invoke-direct {v1}, Ljava/lang/Object;.<init>:()V // method@fc40
-1c1016: 1200                                   |0003: const/4 v0, #int 0 // #0
-1c1018: 5910 8221                              |0004: iput v0, v1, Landroid/app/CompilerHelper;.cnt:I // field@2182
-1c101c: 0e00                                   |0006: return-void
+1c1008:                                        |[1c1008] android.app.CompilerHelper.<init>:()V
+1c1018: 7010 40fc 0100                         |0000: invoke-direct {v1}, Ljava/lang/Object;.<init>:()V // method@fc40
+1c101e: 1200                                   |0003: const/4 v0, #int 0 // #0
+1c1020: 5910 8221                              |0004: iput v0, v1, Landroid/app/CompilerHelper;.cnt:I // field@2182
+1c1024: 0e00                                   |0006: return-void
       catches       : (none)
       positions     :
         0x0000 line=2
@@ -197,30 +197,30 @@ Class #341            -
       registers     : 8
       ins           : 4
       outs          : 2
-      insns size    : 156 16-bit code units
+      insns size    : 160 16-bit code units
 1c0e94:                                        |[1c0e94] android.app.CompilerHelper.zhenghanhan:(III)I
 1c0ea4: 3765 0300                              |0000: if-le v5, v6, 0003 // +0003
 1c0ea8: 0f05                                   |0002: return v5
 1c0eaa: 2b05 5f00 0000                         |0003: packed-switch v5, 00000062 // +0000005f
-1c0eb0: 1305 0900                              |0006: const/16 v5, #int 9 // #9
+1c0eb0: 1305 0b00                              |0006: const/16 v5, #int 11 // #b
 1c0eb4: 2819                                   |0008: goto 0021 // +0019
-1c0eb6: d805 0508                              |0009: add-int/lit8 v5, v5, #int 8 // #08
+1c0eb6: d805 050a                              |0009: add-int/lit8 v5, v5, #int 10 // #0a
 1c0eba: 2816                                   |000b: goto 0021 // +0016
-1c0ebc: d805 0507                              |000c: add-int/lit8 v5, v5, #int 7 // #07
+1c0ebc: d805 0509                              |000c: add-int/lit8 v5, v5, #int 9 // #09
 1c0ec0: 2813                                   |000e: goto 0021 // +0013
-1c0ec2: d805 0506                              |000f: add-int/lit8 v5, v5, #int 6 // #06
+1c0ec2: d805 0507                              |000f: add-int/lit8 v5, v5, #int 7 // #07
 1c0ec6: 2810                                   |0011: goto 0021 // +0010
-1c0ec8: d805 0505                              |0012: add-int/lit8 v5, v5, #int 5 // #05
+1c0ec8: d805 0506                              |0012: add-int/lit8 v5, v5, #int 6 // #06
 1c0ecc: 280d                                   |0014: goto 0021 // +000d
-1c0ece: d805 0504                              |0015: add-int/lit8 v5, v5, #int 4 // #04
+1c0ece: d805 0505                              |0015: add-int/lit8 v5, v5, #int 5 // #05
 1c0ed2: 280a                                   |0017: goto 0021 // +000a
-1c0ed4: d805 0503                              |0018: add-int/lit8 v5, v5, #int 3 // #03
+1c0ed4: d805 0504                              |0018: add-int/lit8 v5, v5, #int 4 // #04
 1c0ed8: 2807                                   |001a: goto 0021 // +0007
-1c0eda: d805 0502                              |001b: add-int/lit8 v5, v5, #int 2 // #02
+1c0eda: d805 0503                              |001b: add-int/lit8 v5, v5, #int 3 // #03
 1c0ede: 2804                                   |001d: goto 0021 // +0004
 1c0ee0: d805 0501                              |001e: add-int/lit8 v5, v5, #int 1 // #01
 1c0ee4: 0000                                   |0020: nop // spacer
-1c0ee6: 2c06 5500 0000                         |0021: sparse-switch v6, 00000076 // +00000055
+1c0ee6: 2c06 5900 0000                         |0021: sparse-switch v6, 0000007a // +00000059
 1c0eec: 1306 0a00                              |0024: const/16 v6, #int 10 // #a
 1c0ef0: 2815                                   |0026: goto 003b // +0015
 1c0ef2: 1306 0900                              |0027: const/16 v6, #int 9 // #9
@@ -267,8 +267,8 @@ Class #341            -
 1c0f5c: 1a03 f5b5                              |005c: const-string v3, "exception occurs" // string@b5f5
 1c0f60: 6e20 74fb 3200                         |005e: invoke-virtual {v2, v3}, Ljava/io/PrintStream;.println:(Ljava/lang/String;)V // method@fb74
 1c0f66: 2701                                   |0061: throw v1
-1c0f68: 0001 0800 0100 0000 1b00 0000 1800 ... |0062: packed-switch-data (20 units)
-1c0f90: 0002 0900 0100 0000 1400 0000 2c01 ... |0076: sparse-switch-data (38 units)
+1c0f68: 0001 0a00 0100 0000 1b00 0000 0300 ... |0062: packed-switch-data (24 units)
+1c0f98: 0002 0900 0100 0000 1400 0000 2c01 ... |007a: sparse-switch-data (38 units)
       catches       : 3
         0x003e - 0x003f
           Ljava/lang/Exception; -> 0x0054
@@ -342,37 +342,41 @@ Class #341            -
         0x0000 - 0x0059 reg=6 b I
         0x0000 - 0x0059 reg=7 c I
         0x0055 - 0x005a reg=1 e Ljava/lang/Exception;
-        0x005a - 0x009c reg=0 retVal I
-        0x005a - 0x009c reg=4 this Landroid/app/CompilerHelper;
-        0x005a - 0x009c reg=5 a I
-        0x005a - 0x009c reg=6 b I
-        0x005a - 0x009c reg=7 c I
+        0x005a - 0x00a0 reg=0 retVal I
+        0x005a - 0x00a0 reg=4 this Landroid/app/CompilerHelper;
+        0x005a - 0x00a0 reg=5 a I
+        0x005a - 0x00a0 reg=6 b I
+        0x005a - 0x00a0 reg=7 c I
 
   source_file_idx   : 8001 (CompilerHelper.java)
 ```
 针对这两行，我们发现有省略号，dexdump工具没有完全把它显现出来
 
-1c0f68: 0001 0800 0100 0000 1b00 0000 1800 ... |0062: packed-switch-data (20 units)
-1c0f90: 0002 0900 0100 0000 1400 0000 2c01 ... |0076: sparse-switch-data (38 units)
+1c0f68: 0001 0a00 0100 0000 1b00 0000 0300 ... |0062: packed-switch-data (24 units)
+1c0f98: 0002 0900 0100 0000 1400 0000 2c01 ... |007a: sparse-switch-data (38 units)
 
 我们使用vim看相应的二进制（在本例子中，该二进制文件是framework.jar中的classes.dex），看看对应的数据：
-其中，1c0f68: 0001 0800 0100 0000 1b00 0000 1800 ... |0062: packed-switch-data (20 units)
+其中，1c0f68: 0001 0a00 0100 0000 1b00 0000 0300 ... |0062: packed-switch-data (24 units)
 对应的数据如下：
 ```
-001c0f60:                     0001 0800 0100 0000  n t.2.'.........
-001c0f70: 1b00 0000 1800 0000 1500 0000 1200 0000  ................
-001c0f80: 0f00 0000 0c00 0000 0900 0000 0600 0000  ................
+001c0f60:                     0001 0a00 0100 0000  n t.2.'.........
+001c0f70: 1b00 0000 0300 0000 1800 0000 1500 0000  ................
+001c0f80: 1200 0000 0f00 0000 0c00 0000 0300 0000  ................
+001c0f90: 0900 0000 0600 0000                      ................
 ```
 
-1c0f90: 0002 0900 0100 0000 1400 0000 2c01 ... |0076: sparse-switch-data (38 units)
+1c0f98: 0002 0900 0100 0000 1400 0000 2c01 ... |007a: sparse-switch-data (38 units)
 展开后的数据如下：
 ```
-001c0f90: 0002 0900 0100 0000 1400 0000 2c01 0000  ............,...
-001c0fa0: a00f 0000 50c3 0000 c027 0900 c0cf 6a00  ....P....'....j.
-001c0fb0: 0012 7a00 804a 5d05 1800 0000 1600 0000  ..z..J].........
-001c0fc0: 1400 0000 1200 0000 1000 0000 0e00 0000  ................
-001c0fd0: 0c00 0000 0900 0000 0600 0000
+001c0f90:                     0002 0900 0100 0000  ................
+001c0fa0: 1400 0000 2c01 0000 a00f 0000 50c3 0000  ....,.......P...
+001c0fb0: c027 0900 c0cf 6a00 0012 7a00 804a 5d05  .'....j...z..J].
+001c0fc0: 1800 0000 1600 0000 1400 0000 1200 0000  ................
+001c0fd0: 1000 0000 0e00 0000 0c00 0000 0900 0000  ................
+001c0fe0: 0600 0000 
 ```
+
+
 
 
 
