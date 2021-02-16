@@ -7,3 +7,4 @@ _pdf
 vendor/
 .bundle/
 push.sh
+tools/.jekyll-cache/
