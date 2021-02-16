@@ -1,0 +1,443 @@
+I""r<h2 id="引言">引言</h2>
+
+<h2 id="以zygote启动来看涉及的jni过程">以Zygote启动来看涉及的JNI过程</h2>
+<p>system/core/rootdir/init.zygote64.rc</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><!-- <td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+</pre></td> --><td class="rouge-code"><pre>service zygote /system/bin/app_process64 <span class="nt">-Xzygote</span> /system/bin <span class="nt">--zygote</span> <span class="nt">--start-system-server</span>
+    class main
+    priority <span class="nt">-20</span>
+    user root
+    group root readproc reserved_disk
+    socket zygote stream 660 root system
+    onrestart write /sys/android_power/request_state wake
+    onrestart write /sys/power/state on
+    onrestart restart audioserver
+    onrestart restart cameraserver
+    onrestart restart media
+    onrestart restart netd
+    onrestart restart wificond
+    writepid /dev/cpuset/foreground/tasks
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>看到 –zygote –start-system-server 这两个参数传入给了app_main.cpp的main里面</p>
+
+<p>frameworks/base/cmds/app_process/app_main.cpp</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><!-- <td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre></td> --><td class="rouge-code"><pre><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="k">const</span> <span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+  <span class="c1">// ...</span>
+  <span class="n">AppRuntime</span> <span class="n">runtime</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">computeArgBlockSize</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">));</span>
+  <span class="c1">// ...</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">zygote</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">runtime</span><span class="p">.</span><span class="n">start</span><span class="p">(</span><span class="s">"com.android.internal.os.ZygoteInit"</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">zygote</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="c1">// ...</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>runtime is an instance of <strong>AppRuntime</strong> inherited from <strong>AndroidRuntime</strong>.</p>
+
+<p>frameworks/base/core/jni/AndroidRuntime.cpp</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><!-- <td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+</pre></td> --><td class="rouge-code"><pre><span class="cm">/*
+ * Start the Android runtime.  This involves starting the virtual machine
+ * and calling the "static void main(String[] args)" method in the class
+ * named by "className".
+ *
+ * Passes the main function two arguments, the class name and the specified
+ * options string.
+ */</span>
+<span class="kt">void</span> <span class="n">AndroidRuntime</span><span class="o">::</span><span class="n">start</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">className</span><span class="p">,</span> <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">String8</span><span class="o">&gt;&amp;</span> <span class="n">options</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">zygote</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="c1">//...</span>
+  <span class="cm">/* start the virtual machine */</span>
+  <span class="n">JniInvocation</span> <span class="n">jni_invocation</span><span class="p">;</span>
+  <span class="n">jni_invocation</span><span class="p">.</span><span class="n">Init</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>
+  <span class="n">JNIEnv</span><span class="o">*</span> <span class="n">env</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">startVm</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mJavaVM</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">env</span><span class="p">,</span> <span class="n">zygote</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">onVmCreated</span><span class="p">(</span><span class="n">env</span><span class="p">);</span>
+
+  <span class="cm">/*
+   * Register android functions.
+   */</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">startReg</span><span class="p">(</span><span class="n">env</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">ALOGE</span><span class="p">(</span><span class="s">"Unable to register all android natives</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+      <span class="k">return</span><span class="p">;</span>
+  <span class="p">}</span>
+
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p><em>frameworks/base/core/jni/AndroidRuntime.cpp</em>
+对于语句 <strong>JniInvocation jni_invocation;</strong>, 我们看下构造函数</p>
+
+<p>libnativehelper/JniInvocation.cpp</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><!-- <td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td> --><td class="rouge-code"><pre><span class="n">JniInvocation</span><span class="o">::</span><span class="n">JniInvocation</span><span class="p">()</span> <span class="o">:</span>
+    <span class="n">handle_</span><span class="p">(</span><span class="nb">NULL</span><span class="p">),</span>
+    <span class="n">JNI_GetDefaultJavaVMInitArgs_</span><span class="p">(</span><span class="nb">NULL</span><span class="p">),</span>
+    <span class="n">JNI_CreateJavaVM_</span><span class="p">(</span><span class="nb">NULL</span><span class="p">),</span>
+    <span class="n">JNI_GetCreatedJavaVMs_</span><span class="p">(</span><span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="n">LOG_ALWAYS_FATAL_IF</span><span class="p">(</span><span class="n">jni_invocation_</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">,</span> <span class="s">"JniInvocation instance already initialized"</span><span class="p">);</span>
+  <span class="n">jni_invocation_</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>jni_invocation里面的四个变量handle_、JNI_GetDefaultJavaVMInitArgs_、JNI_CreateJavaVM_、
+JNI_GetCreatedJavaVMs_初始值为NULL,而内部的jni_invocation_变量指向jni_invocation变量本身。</p>
+
+<p><em>frameworks/base/core/jni/AndroidRuntime.cpp</em>
+我们接着看下一条语句 <strong>jni_invocation.Init(NULL);</strong></p>
+
+<p>libnativehelper/JniInvocation.cpp</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><!-- <td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+</pre></td> --><td class="rouge-code"><pre><span class="kt">bool</span> <span class="n">JniInvocation</span><span class="o">::</span><span class="n">Init</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">library</span><span class="p">)</span> <span class="p">{</span>
+<span class="cp">#ifdef __ANDROID__
+</span>  <span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="n">PROP_VALUE_MAX</span><span class="p">];</span>
+<span class="cp">#else
+</span>  <span class="kt">char</span><span class="o">*</span> <span class="n">buffer</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+<span class="cp">#endif
+</span>  <span class="n">library</span> <span class="o">=</span> <span class="n">GetLibrary</span><span class="p">(</span><span class="n">library</span><span class="p">,</span> <span class="n">buffer</span><span class="p">);</span>
+  <span class="c1">// Load with RTLD_NODELETE in order to ensure that libart.so is not unmapped when it is closed.</span>
+  <span class="c1">// This is due to the fact that it is possible that some threads might have yet to finish</span>
+  <span class="c1">// exiting even after JNI_DeleteJavaVM returns, which can lead to segfaults if the library is</span>
+  <span class="c1">// unloaded.</span>
+  <span class="k">const</span> <span class="kt">int</span> <span class="n">kDlopenFlags</span> <span class="o">=</span> <span class="n">RTLD_NOW</span> <span class="o">|</span> <span class="n">RTLD_NODELETE</span><span class="p">;</span>
+  <span class="n">handle_</span> <span class="o">=</span> <span class="n">dlopen</span><span class="p">(</span><span class="n">library</span><span class="p">,</span> <span class="n">kDlopenFlags</span><span class="p">);</span>
+  <span class="p">...</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">FindSymbol</span><span class="p">(</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">**&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">JNI_GetDefaultJavaVMInitArgs_</span><span class="p">),</span>
+                  <span class="s">"JNI_GetDefaultJavaVMInitArgs"</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">FindSymbol</span><span class="p">(</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">**&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">JNI_CreateJavaVM_</span><span class="p">),</span>
+                  <span class="s">"JNI_CreateJavaVM"</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">FindSymbol</span><span class="p">(</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">**&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">JNI_GetCreatedJavaVMs_</span><span class="p">),</span>
+                  <span class="s">"JNI_GetCreatedJavaVMs"</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p><strong>library = GetLibrary(library, buffer);</strong> 这个语句用于获取library，也就是这里的libart.so</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><!-- <td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+</pre></td> --><td class="rouge-code"><pre><span class="k">static</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">kLibraryFallback</span> <span class="o">=</span> <span class="s">"libart.so"</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">JniInvocation</span><span class="o">::</span><span class="n">GetLibrary</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">library</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">buffer</span><span class="p">,</span> <span class="kt">bool</span> <span class="p">(</span><span class="o">*</span><span class="n">is_debuggable</span><span class="p">)(),</span>
+                                      <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">get_library_system_property</span><span class="p">)(</span><span class="kt">char</span><span class="o">*</span> <span class="n">buffer</span><span class="p">))</span> <span class="p">{</span>
+<span class="cp">#ifdef __ANDROID__
+</span>  <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">default_library</span><span class="p">;</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">is_debuggable</span><span class="p">())</span> <span class="p">{</span>
+    <span class="c1">// Not a debuggable build.</span>
+    <span class="c1">// Do not allow arbitrary library. Ignore the library parameter. This</span>
+    <span class="c1">// will also ignore the default library, but initialize to fallback</span>
+    <span class="c1">// for cleanliness.</span>
+    <span class="n">library</span> <span class="o">=</span> <span class="n">kLibraryFallback</span><span class="p">;</span>
+    <span class="n">default_library</span> <span class="o">=</span> <span class="n">kLibraryFallback</span><span class="p">;</span>
+    <span class="p">...</span>
+  <span class="p">}</span>
+  <span class="p">...</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">library</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">library</span> <span class="o">=</span> <span class="n">default_library</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="n">library</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>接着 <strong>handle_ = dlopen(library, kDlopenFlags);</strong>会返回一个handle赋给handle_，这个是动态库打开，然后
+返回一个句柄供后续dlsym之类的使用。
+我们返回libnativehelper/JniInvocation.cpp里的Init函数接着往下看，是有三个FIndSymbol的调用，我们看下这个函数，其实就是通过dlsym来找到对应的函数地址，并赋给JNI_GetDefaultJavaVMInitArgs_、JNI_CreateJavaVM_、JNI_GetCreatedJavaVMs_这三个变量。</p>
+
+<p>libnativehelper/JniInvocation.cpp</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><!-- <td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre></td> --><td class="rouge-code"><pre><span class="kt">bool</span> <span class="n">JniInvocation</span><span class="o">::</span><span class="n">FindSymbol</span><span class="p">(</span><span class="kt">void</span><span class="o">**</span> <span class="n">pointer</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">symbol</span><span class="p">)</span> <span class="p">{</span>
+  <span class="o">*</span><span class="n">pointer</span> <span class="o">=</span> <span class="n">dlsym</span><span class="p">(</span><span class="n">handle_</span><span class="p">,</span> <span class="n">symbol</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">pointer</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">ALOGE</span><span class="p">(</span><span class="s">"Failed to find symbol %s: %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">dlerror</span><span class="p">());</span>
+    <span class="n">dlclose</span><span class="p">(</span><span class="n">handle_</span><span class="p">);</span>
+    <span class="n">handle_</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><em>frameworks/base/core/jni/AndroidRuntime.cpp</em>
+我们回到AndroidRuntime.cpp中接着看下面语句的执行，首先是 <strong>startVm(&amp;mJavaVM, &amp;env, zygote)</strong>，
+根据传入的参数，我们知道，这个startVM内部需要给mJavaVM和env两个变量进行赋值。</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><!-- <td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+</pre></td> --><td class="rouge-code"><pre><span class="cm">/*
+ * Start the Dalvik Virtual Machine.
+ */</span>
+<span class="kt">int</span> <span class="n">AndroidRuntime</span><span class="o">::</span><span class="n">startVm</span><span class="p">(</span><span class="n">JavaVM</span><span class="o">**</span> <span class="n">pJavaVM</span><span class="p">,</span> <span class="n">JNIEnv</span><span class="o">**</span> <span class="n">pEnv</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">zygote</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="p">...</span>
+  <span class="cm">/*
+ * Initialize the VM.
+ *
+ * The JavaVM* is essentially per-process, and the JNIEnv* is per-thread.
+ * If this call succeeds, the VM is ready, and we can start issuing
+ * JNI calls.
+ */</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">JNI_CreateJavaVM</span><span class="p">(</span><span class="n">pJavaVM</span><span class="p">,</span> <span class="n">pEnv</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">initArgs</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">ALOGE</span><span class="p">(</span><span class="s">"JNI_CreateJavaVM failed</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>startVm函数的绝大多数内容都是解析各种环境参数，我们直接跳到我们关心的点，就是
+JNI_CreateJavaVM(pJavaVM, pEnv, &amp;initArgs)这个函数的调用，这个函数位于</p>
+
+<p>art/runtime/jni/java_vm_ext.cc</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><!-- <td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+</pre></td> --><td class="rouge-code"><pre><span class="c1">// JNI Invocation interface.</span>
+
+<span class="k">extern</span> <span class="s">"C"</span> <span class="n">jint</span> <span class="nf">JNI_CreateJavaVM</span><span class="p">(</span><span class="n">JavaVM</span><span class="o">**</span> <span class="n">p_vm</span><span class="p">,</span> <span class="n">JNIEnv</span><span class="o">**</span> <span class="n">p_env</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">vm_args</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">ScopedTrace</span> <span class="n">trace</span><span class="p">(</span><span class="n">__FUNCTION__</span><span class="p">);</span>
+  <span class="k">const</span> <span class="n">JavaVMInitArgs</span><span class="o">*</span> <span class="n">args</span> <span class="o">=</span> <span class="n">static_cast</span><span class="o">&lt;</span><span class="n">JavaVMInitArgs</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">vm_args</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">JavaVMExt</span><span class="o">::</span><span class="n">IsBadJniVersion</span><span class="p">(</span><span class="n">args</span><span class="o">-&gt;</span><span class="n">version</span><span class="p">))</span> <span class="p">{</span>
+    <span class="n">LOG</span><span class="p">(</span><span class="n">ERROR</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"Bad JNI version passed to CreateJavaVM: "</span> <span class="o">&lt;&lt;</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">version</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">JNI_EVERSION</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">RuntimeOptions</span> <span class="n">options</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">nOptions</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">JavaVMOption</span><span class="o">*</span> <span class="n">option</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">args</span><span class="o">-&gt;</span><span class="n">options</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+    <span class="n">options</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">make_pair</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">option</span><span class="o">-&gt;</span><span class="n">optionString</span><span class="p">),</span> <span class="n">option</span><span class="o">-&gt;</span><span class="n">extraInfo</span><span class="p">));</span>
+  <span class="p">}</span>
+  <span class="n">bool</span> <span class="n">ignore_unrecognized</span> <span class="o">=</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">ignoreUnrecognized</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">Runtime</span><span class="o">::</span><span class="n">Create</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">ignore_unrecognized</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">JNI_ERR</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Initialize native loader. This step makes sure we have</span>
+  <span class="c1">// everything set up before we start using JNI.</span>
+  <span class="n">android</span><span class="o">::</span><span class="n">InitializeNativeLoader</span><span class="p">();</span>
+
+  <span class="n">Runtime</span><span class="o">*</span> <span class="n">runtime</span> <span class="o">=</span> <span class="n">Runtime</span><span class="o">::</span><span class="n">Current</span><span class="p">();</span>
+  <span class="n">bool</span> <span class="n">started</span> <span class="o">=</span> <span class="n">runtime</span><span class="o">-&gt;</span><span class="n">Start</span><span class="p">();</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">started</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">delete</span> <span class="n">Thread</span><span class="o">::</span><span class="n">Current</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">GetJniEnv</span><span class="p">();</span>
+    <span class="n">delete</span> <span class="n">runtime</span><span class="o">-&gt;</span><span class="n">GetJavaVM</span><span class="p">();</span>
+    <span class="n">LOG</span><span class="p">(</span><span class="n">WARNING</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"CreateJavaVM failed"</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">JNI_ERR</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="o">*</span><span class="n">p_env</span> <span class="o">=</span> <span class="n">Thread</span><span class="o">::</span><span class="n">Current</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">GetJniEnv</span><span class="p">();</span>
+  <span class="o">*</span><span class="n">p_vm</span> <span class="o">=</span> <span class="n">runtime</span><span class="o">-&gt;</span><span class="n">GetJavaVM</span><span class="p">();</span>
+  <span class="k">return</span> <span class="n">JNI_OK</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>首先看下 <strong>Runtime::Create(options, ignore_unrecognized)</strong>这行，会调用到下面</p>
+
+<p>art/runtime/runtime.cc</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><!-- <td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+</pre></td> --><td class="rouge-code"><pre><span class="kt">bool</span> <span class="n">Runtime</span><span class="o">::</span><span class="n">Create</span><span class="p">(</span><span class="n">RuntimeArgumentMap</span><span class="o">&amp;&amp;</span> <span class="n">runtime_options</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// TODO: acquire a static mutex on Runtime to avoid racing.</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">Runtime</span><span class="o">::</span><span class="n">instance_</span> <span class="o">!=</span> <span class="nb">nullptr</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">instance_</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Runtime</span><span class="p">;</span>
+  <span class="n">Locks</span><span class="o">::</span><span class="n">SetClientCallback</span><span class="p">(</span><span class="n">IsSafeToCallAbort</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">instance_</span><span class="o">-&gt;</span><span class="n">Init</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">runtime_options</span><span class="p">)))</span> <span class="p">{</span>
+    <span class="c1">// TODO: Currently deleting the instance will abort the runtime on destruction. Now This will</span>
+    <span class="c1">// leak memory, instead. Fix the destructor. b/19100793.</span>
+    <span class="c1">// delete instance_;</span>
+    <span class="n">instance_</span> <span class="o">=</span> <span class="nb">nullptr</span><span class="p">;</span>
+    <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>首先，这一行 <strong>instance_ = new Runtime;</strong> new了一个Runtime实例，并赋给变量，接着调用Init函数，</p>
+
+:ET

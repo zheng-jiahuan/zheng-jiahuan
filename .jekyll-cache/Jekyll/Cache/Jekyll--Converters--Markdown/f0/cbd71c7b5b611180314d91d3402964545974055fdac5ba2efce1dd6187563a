@@ -1,0 +1,177 @@
+I"j+<h2 id="引言">引言</h2>
+<p>在LLVM IR简介一文中，我们提到LLVM IR有三种存在形式，在简介一文中介绍了存在在文件中的
+可读IR和二进制IR，本文将粗略介绍下IR在内存中的形态对应的数据结构。</p>
+
+<h2 id="常见类的层次结构class-hierarchy">常见类的层次结构（Class Hierarchy）</h2>
+
+<ol>
+  <li>Value及常见子类</li>
+</ol>
+
+<p><img src="../assets/img/2019-10-08-llvm_ir_key_data_structure_introduction/1.png" alt="Value and Its Commonly-Used SubClasses" /></p>
+
+<p>我大致绘制了一些常见的Value的子类，每个Value类型的实例都是有Type的。关于<a href="http://llvm.org/docs/ProgrammersManual.html#the-value-class">Value</a>
+官方文档有这样一段话：</p>
+<blockquote>
+  <p>The Value class is the most important class in the LLVM Source base. It represents a
+typed value that may be used (among other things) as an operand to an instruction.</p>
+</blockquote>
+
+<p>在<a href="http://llvm.org/doxygen/Value_8h_source.html">Value</a>的doxygen中也有一段描述:</p>
+
+<blockquote>
+  <p>This is a very important LLVM class. It is the base class of all values computed by a
+program that may be used as operands to other values. Value is the super class of
+other important classes such as Instruction and Function. All Values have a Type. Type
+is not a subclass of Value. Some values can have a name and they belong to some
+Module. Setting the name on the Value automatically updates the module’s symbol
+table.</p>
+</blockquote>
+
+<p>从上图中可以看出，在LLVM中，BasicBlock、Instruction、Function、GlobalVariable等概念，
+都实现为了Value的子类。除了BasicBlock外，图中列举的类还是User类的子类。不过说完还是比
+较空洞，还是结合一个例子来看下比较好：</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre></td><td class="rouge-code"><pre><span class="kt">int</span> <span class="nf">func</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">,</span> <span class="kt">int</span> <span class="n">z</span><span class="p">){</span> 
+  <span class="n">x</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">z</span><span class="p">;</span> 
+  <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">z</span><span class="p">;</span> 
+  <span class="n">z</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">;</span> 
+  <span class="k">return</span> <span class="n">z</span><span class="p">;</span> 
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>将该例子放置在hello.c文件中，并通过下面两个命令将其转换成经过mem2reg优化的可读IR文
+件。这两个命令在之前LLVM IR简介一文中有过解释，这里再次粘贴一下：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>clang hello.c -emit-llvm -S -Xclang -disable-O0-optnone 
+opt -mem2reg -S hello.ll &gt; hello.m2r.ll
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>转换的IR文件内容如下：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre></td><td class="rouge-code"><pre><span class="n">define</span> <span class="n">dso_local</span> <span class="n">i32</span> <span class="err">@</span><span class="n">func</span><span class="p">(</span><span class="n">i32</span> <span class="o">%</span><span class="mi">0</span><span class="p">,</span> <span class="n">i32</span> <span class="o">%</span><span class="mi">1</span><span class="p">,</span> <span class="n">i32</span> <span class="o">%</span><span class="mi">2</span><span class="p">)</span> <span class="err">#</span><span class="mi">0</span> <span class="p">{</span> 
+  <span class="o">%</span><span class="mi">4</span> <span class="o">=</span> <span class="n">add</span> <span class="n">nsw</span> <span class="n">i32</span> <span class="o">%</span><span class="mi">1</span><span class="p">,</span> <span class="o">%</span><span class="mi">2</span> 
+  <span class="o">%</span><span class="mi">5</span> <span class="o">=</span> <span class="n">add</span> <span class="n">nsw</span> <span class="n">i32</span> <span class="o">%</span><span class="mi">4</span><span class="p">,</span> <span class="o">%</span><span class="mi">2</span> 
+  <span class="o">%</span><span class="mi">6</span> <span class="o">=</span> <span class="n">add</span> <span class="n">nsw</span> <span class="n">i32</span> <span class="o">%</span><span class="mi">4</span><span class="p">,</span> <span class="o">%</span><span class="mi">5</span> 
+  <span class="n">ret</span> <span class="n">i32</span> <span class="o">%</span><span class="mi">6</span> 
+<span class="p">}</span> 
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>为了说明问题，将其转化成下图：</p>
+
+<p><img src="../assets/img/2019-10-08-llvm_ir_key_data_structure_introduction/2.png" alt="IR Illustration" /></p>
+
+<p>这里，着重看虚线框框出来的三条指令，每条指令在内存中都由一个Instruction子类对象来表
+示，由于Instruction是Value的子类，所以上面三条Instruction可以看做是三个Value，由于这个
+IR是SSA格式的，所以每个虚拟寄存器都由唯一一条Instruction赋值，所以，虚拟寄存
+器%4,%5,%6也都能唯一代表对应的Instruction。</p>
+
+<p>Instruction也是User的子类，Instruction会使用其他的Value来作为自己的组成部分，比如，对于
+红色框中%6寄存器对应的指令来说，它有两个操作数（operand），对应两个Value，一个是%4
+对应的Instruction，一个是%5对应的Instruction，如上图紫色箭头指向。</p>
+
+<p>查看涉及<a href="http://llvm.org/docs/ProgrammersManual.html#the-value-class">Value</a>的编程文档，有这样一段话：</p>
+
+<blockquote>
+  <p>A particular Value may be used many times in the LLVM representation for a program.
+To keep track of this relationship, the Value class keeps a list of all of the User s that is
+using it.</p>
+</blockquote>
+
+<p>也就是说，每个Value可以被使用许多次，为了跟踪哪些User使用了自己，每个Value在其对象内
+部都维持了一个User链表。以上面的例子来说，对于黄色虚线框中的指令来说，其User链表中包
+含了蓝色框和红色框指令，因为蓝色框指令和红色框指令都使用了黄色框指令，即，都使用了%4
+寄存器。</p>
+
+<p>查看<a href="http://llvm.org/doxygen/Value_8h_source.html">Value.h</a>，有这样一段话：</p>
+
+<blockquote>
+  <p>Every value has a “use list” that keeps track of which other Values are using this Value.</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre>class Value { 
+   Type *VTy; // indicates what type the current instance is 
+   Use *UseList; 
+   ... 
+}
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>看一下<a href="http://llvm.org/doxygen/Use_8h_source.html#l00055">Use.h</a>中关于Use的定义</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="rouge-code"><pre>// A Use represents the edge between a Value definition and its users. 
+class Use { 
+   ... 
+   Value *Val; // refer to one User instance that uses current Value instance 
+   Use *Next; 
+   ... 
+} 
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>所以在内存中，use list类似于这种：</p>
+
+<p><img src="../assets/img/2019-10-08-llvm_ir_key_data_structure_introduction/user_list.png" alt="User List" /></p>
+
+<p>接下来关注下Function和GlobalVariable类，把上图在下面再粘贴一下</p>
+
+<p><img src="../assets/img/2019-10-08-llvm_ir_key_data_structure_introduction/1.png" alt="Value and Its Commonly-Used SubClasses" /></p>
+
+<p>为啥全局变量（GlobalVariable）和函数（Function）是用Constant的子类，可能可以这样理
+解，那就是全局变量和函数它们在链接后，它们的Value（即地址address）都是固定的，从这种
+角度来说，是常量。</p>
+
+<p>另外，由于全局变量和函数能够在不同函数间被访问到，所以它们是GlobalValue的子类也是比较
+好理解的。</p>
+
+<ol>
+  <li>Type及常见子类</li>
+</ol>
+
+<p><img src="../assets/img/2019-10-08-llvm_ir_key_data_structure_introduction/type_and_subclass.png" alt="User List" /></p>
+
+<p>每个Value都有一个Type，这个很好理解哈，值得注意的是，Type不是Value的子类哈。
+稍微提一下<a href="http://llvm.org/docs/ProgrammersManual.html#functiontype">FunctionType</a>，它为Function指定了形式化参数和返回值信息。一个FunctionType实
+例可以被多个Function实例共用，当这些Function具有相同的参数类型和返回类型。</p>
+
+<h2 id="modulefunctionbasicblock以及instruction在内存中的组织关系">Module、Function、BasicBlock以及Instruction在内存中的组织关系</h2>
+
+<p>其次介绍一下Module、Function、BasicBlock以及Instruction实例之间在内存中的组织关系</p>
+
+<p><img src="../assets/img/2019-10-08-llvm_ir_key_data_structure_introduction/relation.png" alt="Organization In Memory" /></p>
+
+<p>上图非常清晰的将这四个结构在LLVM中的组织方式展示了出来，可以看出，这些数据结构以某种
+链表的形式进行了连接，LLVM中提供了iterator以及visitor等两种方式来遍历这些结构，在遍历的
+过程中，可以通过代码来对这些结构进行增删改查等一系列操作，下一篇文章将依据本章的知识，
+通过一些代码来演示如何操作LLVM IR。
+其他未见内容可以参考资料<a href="#refer-anchor-1"><sup>1</sup></a><a href="#refer-anchor-2"><sup>2</sup></a><a href="#refer-anchor-3"><sup>3</sup></a></p>
+
+<h2 id="references">References</h2>
+
+<div id="refer-anchor-1"></div>
+<p>[1]. <a href="http://llvm.org/docs/ProgrammersManual.html">LLVM编程手册</a></p>
+<div id="refer-anchor-2"></div>
+<p>[2]. <a href="http://llvm.org/docs/WritingAnLLVMPass.html">LLVM Pass 编写指南</a></p>
+<div id="refer-anchor-3"></div>
+<p>[3]. <a href="https://llvm.org/doxygen">LLVM API文档</a></p>
+:ET

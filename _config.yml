@@ -1,117 +1,177 @@
-repository: zheng-hanhan/zheng-hanhan
+# The Site Configuration
 
-output: web
-# this property is useful for conditional filtering of content that is separate from the PDF.
+# Import the theme
+theme: jekyll-theme-chirpy
 
-topnav_title: Zheng-hanhan Blog
-# this appears on the top navigation bar next to the home button
+# Only if your site type is GitHub Project sites and doesn't have a custom domain,
+# change below value to '/projectname'.
+baseurl: ''
 
-site_title: Zheng-hanhan Blog
-# this appears in the html browser tab for the site title (seen mostly by search engines, not users)
+# the HTML language tag › https://www.w3.org/International/questions/qa-choosing-language-tags
+lang: en-US
 
-company_name: Zheng-hanhan Company
-# this appears in the footer
+# Change to your timezone › http://www.timezoneconverter.com/cgi-bin/findzone/findzone
+timezone: Asia/Shanghai
 
-#github_editme_path: tomjoht/documentation-theme-jekyll/blob/gh-pages/
-# if you're using Github, provide the basepath to the branch you've created for reviews, following the sample here. if not, leave this value blank.
+# jekyll-seo-tag settings › https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
+# --------------------------
+title: Zhenghanhan Blog                          # the main title
 
-# gitlab_editme_path: tomjoht/documentation-theme-jekyll/blob/gh-pages/
-# if you're using GitLab, provide the basepath to the branch you've created for reviews, following the sample here. if not, leave this value blank.
+tagline: Never Cease to be Eager to Techniques  # it will display as the sub-title
 
-#google_analytics: UA-66296557-1
-# if you have google-analytics ID, put it in. if not, edit this value to blank.
+description: >-                        # used by seo meta and the atom feed
+  A minimal, portfolio, sidebar,
+  bootstrap Jekyll theme with responsive web design
+  and focuses on text presentation.
 
-host: 127.0.0.1
-# the preview server used. Leave as is.
+# fill in the protocol & hostname for your site, e.g., 'https://username.github.io'
+url: ''
 
-port: 4000
-# the port where the preview is rendered. You can leave this as is unless you have other Jekyll builds using this same port that might cause conflicts. in that case, use another port such as 4006.
+author: zjh                  # change to your full name
 
-exclude:
-  - .idea/
-  - .gitignore
-  - vendor
-# these are the files and directories that jekyll will exclude from the build
+github:
+  username: github_username             # change to your github username
 
-feedback_subject_line: Zheng-hanhan Blog
+twitter:
+  username: twitter_username            # change to your twitter username
 
-feedback_email: alanwilliams@foxmail.com
-# used as a contact email for the Feedback link in the top navigation bar
+social:
+  name: zjh                  # it will shows as the copyright owner in Footer
+  email: alanwilliams@foxmail.com       # change to your email address
+  links:
+    # The first element serves as the copyright owner's link
+    #- https://twitter.com/username      # change to your twitter homepage
+    #- https://github.com/username       # change to your github homepage
+    # Uncomment below to add more social links
+    # - https://www.facebook.com/username
+    # - https://www.linkedin.com/in/username
 
-# feedback_disable: true
-# if you uncomment the previous line, the Feedback link gets removed
+google_site_verification: google_meta_tag_verification # change to your verification string
+# --------------------------
 
-# feedback_text: "Need help?"
-# if you uncomment the previous line, it changes the Feedback text
+google_analytics:
+  id: ''          # Fill with your Google Analytics ID
+  pv:
+    # The Google Analytics pageviews switch.
+    # DO NOT enable it unless you know how to deploy the Google Analytics superProxy.
+    enabled: false
+    # the next options only valid when `google_analytics.pv` is enabled.
+    proxy_url: ''
+    proxy_endpoint: ''
+    cache: false  # pv data local cache, good for the users from GFW area.
 
-# feedback_link: "http://helpy.io/"
-# if you uncomment the previous line, it changes where the feedback link points to
+# Prefer color scheme setting.
+#
+# Note: Keep empty will follow the system prefer color by default,
+# and there will be a toggle to switch the theme between dark and light
+# on the bottom left of the sidebar.
+#
+# Available options:
+#
+#     light  - Use the light color scheme
+#     dark   - Use the dark color scheme
+#
+theme_mode:   # [light|dark]
 
-highlighter: rouge
-# library used for syntax highlighting
+# The CDN endpoint for images.
+# Notice that once it is assigned, the CDN url
+# will be added to all image (site avatar & posts' images) paths starting with '/'
+#
+# e.g. 'https://cdn.com'
+img_cdn: ''
 
-markdown: kramdown
+# the avatar on sidebar, support local or CORS resources
+avatar: https://cdn.jsdelivr.net/gh/cotes2020/chirpy-images/commons/avatar.jpg
+
+# boolean type, the global switch for ToC in posts.
+toc: true
+
+#page_excerpts: true
+
+disqus:
+  comments: false  # boolean type, the global switch for posts comments.
+  shortname: ''    # Fill with your Disqus shortname. › https://help.disqus.com/en/articles/1717111-what-s-a-shortname
+
+paginate: 10
+
+# ------------ The following options are not recommended to be modified ------------------
+
 kramdown:
- input: GFM
- auto_ids: true
- hard_wrap: false
- syntax_highlighter: rouge
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:   # Rouge Options › https://github.com/jneen/rouge#full-options
+    css_class: highlight
+    # default_lang: console
+    span:
+      line_numbers: false
+    block:
+      line_numbers: true
+      start_line: 1
 
-# filter used to process markdown. note that kramdown differs from github-flavored markdown in some subtle ways
+# DO NOT change this unless you're a Pro user on Jekyll and Web development,
+# Or you think you're smart enough to change other relevant URLs within this template.
+permalink: /posts/:title/
 
 collections:
-  tooltips:
-    output: false
-# collections are declared here. this renders the content in _tooltips and processes it, but doesn't output it as actual files in the output unless you change output to true
+  tabs:
+    output: true
+    sort_by: order
+
 
 defaults:
   -
     scope:
-      path: ""
-      type: "pages"
+      path: ''          # An empty string here means all files in the project
+      type: posts
     values:
-      layout: "page"
-      comments: true
-      # if you don't want to use Commento.io and just hide comments, change true to false wherever you see the comments property
-      search: true
-      sidebar: home_sidebar
-      topnav: topnav
+      layout: post
+      comments: true    # Enable comments in posts.
+      toc: true         # Display TOC column in posts.
   -
     scope:
-      path: ""
-      type: "tooltips"
+      path: _drafts
     values:
-      layout: "page"
-      search: true
-      tooltip: true
-
+      comments: false
   -
     scope:
-      path: ""
-      type: "posts"
+      path: ''
+      type: tabs             # see `site.collections`
     values:
-      layout: "post"
-      comments: true
-      # if you don't want to use Commento.io and just hide comments, change true to false wherever you see the comments property
-      search: true
-      sidebar: home_sidebar
-      topnav: topnav
+      layout: page
+      permalink: /:title/
+      dynamic_title: true    # Hide title in mobile screens.
 
-# these are defaults used for the frontmatter for these file types
+sass:
+  style: compressed
 
-sidebars:
-- home_sidebar
-#- mydoc_sidebar
-- product1_sidebar
-- product2_sidebar
-- other
+compress_html:
+  clippings: all
+  comments: all
+  endings: all
+  profile: false
+  blanklines: false
+  ignore:
+    envs: [development]
 
-description: "Intended as a documentation theme based on Jekyll for technical writers documenting software and other technical products, this theme has all the elements you would need to handle multiple products with both multi-level sidebar navigation, tags, and other documentation features."
-# the description is used in the feed.xml file
+exclude:
+  - vendor
+  - Gemfile
+  - Gemfile.lock
+  - '*.gem'
+  - '*.gemspec'
+  - tools
+  - docs
+  - README.md
+  - LICENSE
+  - gulpfile.js
+  - node_modules
+  - package.json
+  - package-lock.json
 
-# needed for sitemap.xml file only
-# url: http://idratherbewriting.com
-# baseurl: /documentation-theme-jekyll
-
-
-github: [metadata]
+jekyll-archives:
+  enabled: [categories, tags]
+  layouts:
+    category: category
+    tag: tag
+  permalinks:
+    tag: /tags/:name/
+    category: /categories/:name/

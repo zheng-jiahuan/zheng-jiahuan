@@ -1,0 +1,6 @@
+I"	<h2 id="zygoteinitmain">ZygoteInit.main</h2>
+<p>我们知道，虚拟机创建后，执行的第一个java代码是ZygoteInit的main方法，我们来看下这个方法内部的一些主要代码：
+```java
+…
+zygoteServer = new ZygoteServer(isPrimaryZygote);</p>
+:ET
