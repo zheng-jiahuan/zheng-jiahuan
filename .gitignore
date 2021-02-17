@@ -1,11 +1,19 @@
-_site/
-.sass-cache/
-.jekyll-metadata
-_pdf
-.DS_Store
-.idea
-vendor/
-.bundle/
 push.sh
-tools/.jekyll-cache/
-.jekyll-cache/
+
+# hidden files
+.*
+!.github
+
+# jekyll cache
+_site
+vendor
+
+# rubygem
+*.gem
+# yard docs
+doc
+
+# npm dependencies
+node_modules
+package-lock.json
+
